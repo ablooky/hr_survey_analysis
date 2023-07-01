@@ -23,18 +23,6 @@ header <- dashboardHeader(fixed=T,
                           title='HR APP',
                          tags$h1('HUMAN RESOURCES SURVEY ENGAGEMENT ANALYSIS',
                                  style = "font-size: 36px ;" ),
-                          # tags$li(
-                          #   div(style="display: inline; 
-                          #   padding: 0px 0px 0px 0px ; 
-                          #       font-size: 36px ; width: 300px;
-                          # 
-                          #   font-family: 'Saira Stencil One';
-                          #       #font-face: Helvetica; 
-                          #       color: #FFFFFF ;",
-                          #               HTML("HUMAN RESOURCES SURVEY ENGAGEMENT ANALYSIS<br>")),
-                          #   class = "dropdown"),
-                          leftUi  = tagList(
-                          )
                           )
 sidebar <- dashboardSidebar(
   width = 220,
