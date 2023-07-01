@@ -1,2 +1,1 @@
-# hr_survey_analysis
-Survey analysis dashboard
+# hr_survey_demo
