@@ -19,7 +19,8 @@ clients<-list.files('data/clients')
 header <- dashboardHeader(fixed=T, 
                           # use_googlefont("Roboto Slab"),
                          # use_googlefont("Open Sans"),
-                          use_googlefont("Montserrat"),
+                         use_googlefont("Oswald"),
+                      #    use_googlefont("Montserrat"),
                           #skinSelector()
                           title='HR APP',
                           tags$h1('HUMAN RESOURCES SURVEY ENGAGEMENT ANALYSIS',
@@ -122,18 +123,13 @@ demographics_tab<-tabItem (tabName = "demographic_analysis",
 )
 #downloads tab ui ----
 downloads_tab<-tabItem(tabName='downloads', 
-                    #   tags$div(class='download_tables',
-                                h3('Analysis by Survey Questions'),
-                                DT::dataTableOutput('demographic_analysis_table'),
-                                # shiny::downloadButton('downloadSurveyAnalysis_csv', '.csv Export'),
-                                # shiny::downloadButton('downloadSurveyAnalysis_xlsx', 'Excel .xlsx Export'),
-                                # shiny::downloadButton('downloadSurveyAnalysis_pdf', 'PDF Export'),
-                                hr(), 
-                                h3('Analysis by Survey Job Category'),
-                                DT::dataTableOutput('summary_demographics_analysis_table')
-                                #shiny::downloadButton('downloadSummary_xlsx', '.xlsx'),
-                                #shiny::downloadButton('downloadSummary_pdf', '.pdf'),
-                      # )
+                       h3(HTML('Analysis by Survey Questions'),
+                          style = 'color:blue;font-weight:bold;'),
+                       hr(), 
+                       DT::dataTableOutput('demographic_analysis_table'),
+                       hr(), 
+                       h3('Analysis by Survey Job Category'),
+                       DT::dataTableOutput('summary_demographics_analysis_table')
 )
 # Detailed tab ui ----
 detailed_tab <- tabItem (
@@ -305,38 +301,11 @@ server <- function(input, output) {
       extensions = 'Buttons',
       options = list(
         pageLength = 15,
-        dom = 'Brtip',
+        dom = 'Brt',
         buttons = c('copy','excel', 'print'),
         scrollX = TRUE
       )
     )
-  # output$downloadSurveyAnalysis_csv<- downloadHandler(
-  #   # csv output
-  #   filename = function() {
-  #     paste0("Survey Analysis by Demographic", ".csv")
-  #   },
-  #   content = function(file) {
-  #     write.csv(downloadable_objects[[2]], file)
-  #   })
-  # output$downloadSurveyAnalysis_xlsx <- downloadHandler(
-  #   # excel output
-  #   filename = function() {
-  #     paste0("Survey Analysis by Demographic", ".xlsx")
-  #   },
-  #   content = function(file) {
-  #     openxlsx::write.xlsx(file, downloadable_objects[[2]])
-  #   })
-  # output$downloadSurveyAnalysis_pdf <- downloadHandler(
-  #   #pdf report
-  #   filename = function() {
-  #     paste0("Survey Analysis by Demographic", ".pdf")
-  #   },
-  #   content = function(file) {
-  #     tempReport <- file.path(tempdir(), 'scripts/pdf_export.Rmd, tempReport, overwrite = TRUE')
-  #     file.copy('scripts/pdf_export.Rmd', tempReport, overwrite = TRUE)
-  #     output <- rmarkdown::render(input = tempReport)
-  #     file.copy(output, file) 
-  #   })
   
   ## Detailed analysis ----
   observe({
