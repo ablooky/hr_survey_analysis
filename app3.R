@@ -91,7 +91,9 @@ detailed_tab <- tabItem (
   hr(),
   conditionalPanel(
     condition = "input.selected_question_category == 'All Questions'",
-    #column(4,offset=0,plotOutput('detailed_all_questions_plot1',height=150)),
+    #column(4,
+    #offset=0,
+    #plotOutput('detailed_all_questions_plot1',height=150)),
     column(
       11, offset = 1, reactableOutput('detailed_questions_table'), 
       # plotOutput('detailed_all_questions_plot1'),
@@ -259,10 +261,10 @@ server <- function(input, output) {
   observe({
     detailed_objects<-
       get_detailed_objects(client_name, report_year,selectedQuestionCategory())
-    #output$detailed_questions_plot<-renderPlot(detailed_objects[[1]])
-    output$detailed_questions_plot2<-renderPlot(detailed_objects[[1]])
-    output$detailed_questions_table<-renderReactable({detailed_objects[[2]]})
-    output$questions_filtered_table<-renderTable(detailed_objects[[3]],
+    #output$detailed_questions_plot<-renderPlot(detailed_objects[['questions plot']])
+    output$detailed_questions_plot2<-renderPlot(detailed_objects[['questions plot']])
+    output$detailed_questions_table<-renderReactable({detailed_objects[['questions table']]})
+    output$questions_filtered_table<-renderTable(detailed_objects[['filtered table']],
                                                  rownames=FALSE, 
                                                  colnames=FALSE)
     #output$detailed_all_questions_plot1<-renderPlot(detailed_objects[[4]][[1]])

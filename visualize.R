@@ -3,7 +3,7 @@ library(plotly)
 library(patchwork)
 library(reactable)
 
-#List of clients
+# List of clients ---- 
 clients<-list.files('data/clients')
 client_name<-clients[1]
 fileindex<-1
@@ -20,18 +20,18 @@ get_years_list<-function(client_name){
 }
 
 
-#categories
+# Categories ----
 categories_df<-get_categories_df(client_name,fileindex)
 categories_desc<-categories_df[,2]
 categories<-unique(categories_df[,1])
 
-#profiles
+# Profiles ----
 profile_dataset<-get_profiles(client_name,1,categories_desc)
 participants_list<-profile_dataset[,'Participants']
 colnames(raw_results)<-c('Question_number', 'Question_category','Question_desc', participants_list)
 participants_sorted<-sort(participants_list,decreasing = FALSE)
 
-#Survey Questions
+# Survey Questions ----
 questions_table<-raw_results[,1:3] %>% 
   mutate(question = paste0('Question ',Question_number))
   #mutate(question = paste0('Question_',Question_number))
@@ -42,13 +42,11 @@ get_questions_category<-function(){
 }
 profile_revised<-modify_profile(profile_dataset,categories,participants_list)
 
-#Departments
+# Departments ----
 department_list<-na.omit(dplyr::distinct(data.frame(profile_revised),Department))[,'Department']
-
-
 formatted_results<-generate_formatted_results(raw_results,participants_list)
 
-#color paletettes
+# Color palettes  ----
 get_color_palette<-function(type='main'){
   cp<-c('#2B2E4A', '#e84545','#903749','#709fb0')
   if(type == 'blue'){ cp<-c('#413c69','#4a47a3','#709fb0','#a7c5eb')}
@@ -77,10 +75,14 @@ get_summary_objects<-function(client_name, report_year){
 
 
 
-## demographic visualization ----
+
+# Demographic visualization ----
+
+## demographic - tables 
 demographics_table<-generate_demographics_ds(profile_dataset, formatted_results)
 summary_demographics_table<-generate_summary_demographics_ds(demographics_table)
 
+## demographic - functions
 get_number_of_cat_elements<-function(attribute,categories_df){
   get_column_name<-c()
   categories_df2<-cbind(categories_df,names(profile_dataset)[2:length(profile_dataset)])
@@ -214,30 +216,30 @@ analyze_demographics<-function(demographics_table, attribute,query_type,profile_
   #multi_plot
   return(multi_plot)
 }
-
 get_demographics_objects<-function(client_name, report_year,demographics_attribute){
   
   num_cat_elements<-get_number_of_cat_elements(demographics_attribute,categories_df)
-
-  demographic_breakdown_pie<-demographics_participant_stats_plot(profile_revised, 
-                                                            demographics_attribute)
   
-  demographics_attribute_plot<- analyze_demographics(demographics_table,  
-                                                     demographics_attribute, 
-                                                     'question',
-                                                     profile_dataset)
+  demographic_breakdown_pie<-demographics_participant_stats_plot(profile_revised, 
+                                                                 demographics_attribute)
+  
+  # demographics_attribute_plot<- analyze_demographics(demographics_table,  
+  #                                                    demographics_attribute, 
+  #                                                    'question',
+  #                                                    profile_dataset)
   #summary_demographics_table_scored<-generate_summary_demographics_scored(summary_demographics_table)
   attribute_category_plot<-analyze_demographics(summary_demographics_table,
                                                 demographics_attribute,
                                                 'category',
                                                 profile_dataset)
-  objects_list<-list(demographic_breakdown_pie,
-                     demographics_attribute_plot,
-                     attribute_category_plot,
-                     num_cat_elements)
- return(objects_list)   
+  objects_list<-list('pie chart' = demographic_breakdown_pie,
+                     # demographics_attribute_plot,
+                     'attribute plot' = attribute_category_plot,
+                     'cat elements' = num_cat_elements)
+  return(objects_list)   
 }
-#Downloads
+
+# Downloads ----
 get_downloadable_objects<-function(client_name, report_year){
   download_demographics_table<-generate_demographics_ds_scored(demographics_table)
   summary_demographics_table_scored<-generate_summary_demographics_scored(summary_demographics_table)
@@ -247,7 +249,6 @@ get_downloadable_objects<-function(client_name, report_year){
 }
 
 #Detailed Analysis ----
-
 get_score_distribution_plot<-function(df){
   df2<-cbind(df[,1],df[,3:6])
   df3<-data.frame(Favorable = mean(df$Favorable),
@@ -363,43 +364,51 @@ generate_Question_category_plots2<-function(df,question_type){
   data_filtered<-data %>% filter(Question_category==question_type) %>%
     select(-Question_category)
   data_converted<-convert_scores(data_filtered)
+  questions_table2<-questions_table %>% 
+    mutate(Question_number = as.character(Question_number),
+           Question_merged = paste(Question_desc, Question_number,sep = ' | ')) 
   new_df<-data.frame()
   for (x in 1:nrow(data_filtered)){
     data_calculated<-calculate_favorability2(data_converted[x,])
     data_calculated$question<-rownames(data_filtered)[x]
     data_calculated$percent_score<-data_calculated$percent_score*100
-    data_calculated<- data_calculated %>% mutate(lab_ypos = cumsum(percent_score) + 0.5 * percent_score) 
-    new_df<-rbind(new_df,data_calculated)
+    merged<-inner_join(data_calculated, questions_table2, 
+                       by = c('question' = 'Question_number'))
+    #data_calculated<- data_calculated %>% 
+     # mutate(lab_ypos = cumsum(percent_score) + 0.5 * percent_score) 
+    #mutate(cumsum = cumsum(percent_score),
+        #   lab_ypos = cumsum(percent_score) + 0.5 * percent_score) 
+    new_df<-rbind(new_df,merged)
     
   }
-  
-  new_df=new_df %>% arrange(desc(question))
+  View(new_df)
+  #new_df=new_df %>% arrange(desc(question))
+  new_df=new_df %>% arrange(question)
   # questions<-unique(new_df$question)
   #new_df$question<-factor(new_df$question, levels=sort(new_df$question, decreasing = TRUE))
-  g<-ggplot(new_df, aes(x= question,y=percent_score,fill=factor(description,
-                                                                levels=c('DNK',
-                                                                         'Unfavorable',
-                                                                         'Neutral',
-                                                                         'Favorable'
-                                                                )))) + 
-    geom_bar(width = 0.6, stat='identity',position='fill') +
+  g<-ggplot(new_df, aes(x= question,y=percent_score,label=percent_score,
+                       # fill=factor(description,levels=c('DNK','Unfavorable','Neutral','Favorable'))
+                        fill=description
+                        )) + 
+   geom_bar(width = 0.9, stat='identity') +
+    geom_text(size = 4, position = position_stack(vjust = 0.5), color='white', 
+              fontface = 'bold', family = '' )+
     theme_void()+ 
-    #scale_x_discrete(order(new_df$question,desc=TRUE))+
-    scale_x_discrete(sort(new_df$question, decreasing=TRUE))+
+  # scale_x_discrete(reorder(new_df$question,desc=TRUE))+
+   scale_x_discrete(labels = sort(new_df$Question_merged,decreasing = T))+
     scale_y_continuous()+
     theme(legend.position = 'bottom',
+          axis.text.x = element_text(face='bold', color="#993333",size = 15),
           legend.title = element_blank(),
           #legend.text = element_text(sort)
           axis.text.y=element_text())+
     coord_flip()+
     #scale_fill_manual(values=color_palette)+
-    labs(title='PERCENT SCORE DISTRIBUTION',caption =question_type)+
-    geom_label(aes(x=question, y=lab_ypos,label=percent_score),position='fill',color='white')
+    labs(title='PERCENT SCORE DISTRIBUTION',caption =question_type)
   g
   
   return(g)
 }
-
 get_detailed_objects<-function(client_name,report_year,question_type){
   #detailed_questions_plot<-get_detailed_analysis(convert_scores(formatted_results),question_type)
   detailed_questions_plot2<-get_detailed_analysis_2(formatted_results,
@@ -415,9 +424,9 @@ get_detailed_objects<-function(client_name,report_year,question_type){
     )
   objects_list<-list(
     #detailed_questions_plot,
-                     detailed_questions_plot2,
-                     detailed_questions_table,
-                     questions_filtered_table,
-                     distribution_scores_plots)
+                   'questions plot' = detailed_questions_plot2,
+                     'questions table' =  detailed_questions_table,
+                     'filtered table' = questions_filtered_table,
+                     'distribution scores' = distribution_scores_plots)
   return(objects_list)
 }
