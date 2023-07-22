@@ -50,7 +50,7 @@ sidebar <- dashboardSidebar(
     id = 'sidebar', 
     menuItem(
       "Summary Analysis",
-      selected = T,
+      #selected = T,
       tabName = 'summary',
       icon = icon('dashboard')
     ),
@@ -69,7 +69,7 @@ sidebar <- dashboardSidebar(
       
     ),
     menuItem("Downloads",
-             #selected=TRUE,
+             selected=TRUE,
              tabName = 'downloads',
              icon = icon('fa-solid fa-download')
     )
@@ -114,18 +114,7 @@ demographics_tab<-tabItem (tabName = "demographic_analysis",
                                        choices = categories, 
                                        selected = 1), hr(),
                            fluidRow(
-                             box
-                             (width=8, 
-                               status='primary',
-                               # title = 'Average Favorability Score Per Question Category and Demographic Attribute',
-                               h3('Average Favorability Score Per Question Category and Demographic Attribute')         ,
-                               plotOutput('attribute_category_plot'),
-                               collapsible=F),
-                             box(width=4,  
-                                 h3('Demographic Breakdown of Survey'),
-                                 status='primary',
-                                 plotlyOutput('demographic_breakdown_pie',height='100%')
-                             )
+                             uiOutput('demographics_UI')
                            )
                            # fluidRow(box(width=12,
                            #              plotOutput('attribute_plot')
@@ -133,12 +122,18 @@ demographics_tab<-tabItem (tabName = "demographic_analysis",
 )
 #downloads tab ui ----
 downloads_tab<-tabItem(tabName='downloads', 
-                       tags$div(class='download_tables',
+                    #   tags$div(class='download_tables',
+                                h3('Analysis by Survey Questions'),
                                 DT::dataTableOutput('demographic_analysis_table'),
-                                shiny::downloadButton('downloadSurveyAnalysisDemographic', 'Download Entire Table'),
+                                # shiny::downloadButton('downloadSurveyAnalysis_csv', '.csv Export'),
+                                # shiny::downloadButton('downloadSurveyAnalysis_xlsx', 'Excel .xlsx Export'),
+                                # shiny::downloadButton('downloadSurveyAnalysis_pdf', 'PDF Export'),
                                 hr(), 
-                                DT::dataTableOutput('summary_demographics_analysis_table'),
-                       )
+                                h3('Analysis by Survey Job Category'),
+                                DT::dataTableOutput('summary_demographics_analysis_table')
+                                #shiny::downloadButton('downloadSummary_xlsx', '.xlsx'),
+                                #shiny::downloadButton('downloadSummary_pdf', '.pdf'),
+                      # )
 )
 # Detailed tab ui ----
 detailed_tab <- tabItem (
@@ -224,59 +219,124 @@ server <- function(input, output) {
       get_demographics_objects(client_name, report_year,
                                selectedDemographicAttribute())
     # })
-    plotheight <- reactive({
-      demographics_objects_list[[4]]
-    })
-    output$demographic_breakdown_pie <-
-      renderPlotly(demographics_objects_list[[1]])
-    #observe({
-    output$demographics_attribute_plot <-
-      renderPlot(demographics_objects_list[[2]],height = 4*225)
-    # observe({
-    print(plotheight())
-    output$attribute_category_plot <-
-      renderPlot(demographics_objects_list[[3]],
-                 height = plotheight() *225
+    
+    
+    
+    
+    output$demographics_UI<-renderUI({
+      plotheight <- reactive({
+        demographics_objects_list[['cat elements']]
+      })
+      fluidRow(
+      box (width=8, status='primary',
+        # title = 'Average Favorability Score Per Question Category and Demographic Attribute',
+        h3('Average Favorability Score Per Question Category & Demographic Attribute')         ,
+        #plotOutput('attribute_category_plot'),collapsible=F)
+      #observe({
+      # output$demographics_attribute_plot <-
+      #   renderPlot(demographics_objects_list[[2]],height = 4*225)
+      # observe({
+      #print(plotheight())
+     # output$attribute_category_plot <-
+        renderPlot(demographics_objects_list[['attribute plot']],
+                   height = plotheight() *225)
+      ),
+      box(width=4,  
+          h3('Demographic Breakdown of Survey'),
+          status='primary',
+         # output$demographic_breakdown_pie <-
+            renderPlotly(demographics_objects_list[['pie chart']])
+          #plotlyOutput('demographic_breakdown_pie',height='100%')
       )
-    #  })
+      )
+    })
+
   })
   #Downloads ----
   downloadable_objects <-
     get_downloadable_objects(client_name, report_year)
   output$demographic_analysis_table <-
-    DT::renderDT(
+    DT::renderDataTable(server = F, {
+      DT::datatable(
       downloadable_objects[[1]],
       caption = 'Survey Analysis (Average Score by Demographic)',
       extensions = 'Buttons',
+      selection = 'none',
       rownames = F,
       options = list(
-        pageLength = 5,
-        dom = 'Brtip',
-        buttons = c('copy', 'excel', 'pdf', 'print'),
-        scrollX = TRUE
-      )
+        #pageLength = 5,
+        autoWidth = F,
+        dom = 'Brltip',
+        scrollX = TRUE,
+        buttons = list(
+           'copy', 'print',
+           list(
+            extend = 'collection',
+            buttons = list(
+              list(extend = "csv", filename = "page",exportOptions = list(
+                columns = ":visible",modifier = list(page = "current"))
+              ),
+              list(extend = 'excel', filename = "page", title = NULL, 
+                   exportOptions = list(columns = ":visible",modifier = list(page = "current")))),
+            text = 'Download current page'),
+          list(
+            extend = 'collection',
+            buttons = list(
+              list(extend = "csv", filename = "data",exportOptions = list(
+                columns = ":visible",modifier = list(page = "all"))
+              ),
+              list(extend = 'excel', filename = "data", title = NULL, 
+                   exportOptions = list(columns = ":visible",modifier = list(page = "all")))),
+            text = 'Download all data')
+        ),
+        # add the option to display more rows as a length menu
+        lengthMenu = list(c(5,10, 30, 50, -1),
+                          c('5','10', '30', '50', 'All'))
+      ),
+      class = "display"
     )
+      }
+      )
+   
   output$summary_demographics_analysis_table <-
     DT::renderDT(
       downloadable_objects[[2]],
       caption = 'Survey Analysis (Average Score by Question Category)',
-      extensions =
-        'Buttons',
+      extensions = 'Buttons',
       options = list(
         pageLength = 15,
-        dom = 'Bt',
-        buttons = c('copy', 'excel', 'pdf', 'print'),
-        scrollX =
-          TRUE
+        dom = 'Brtip',
+        buttons = c('copy','excel', 'print'),
+        scrollX = TRUE
       )
     )
-  output$downloadSurveyAnalysisDemographic <- downloadHandler(
-    filename = function() {
-      paste0("Survey Analysis by Demographic", ".csv")
-    },
-    content = function(file) {
-      write.csv(downloadable_objects[[2]], file)
-    })
+  # output$downloadSurveyAnalysis_csv<- downloadHandler(
+  #   # csv output
+  #   filename = function() {
+  #     paste0("Survey Analysis by Demographic", ".csv")
+  #   },
+  #   content = function(file) {
+  #     write.csv(downloadable_objects[[2]], file)
+  #   })
+  # output$downloadSurveyAnalysis_xlsx <- downloadHandler(
+  #   # excel output
+  #   filename = function() {
+  #     paste0("Survey Analysis by Demographic", ".xlsx")
+  #   },
+  #   content = function(file) {
+  #     openxlsx::write.xlsx(file, downloadable_objects[[2]])
+  #   })
+  # output$downloadSurveyAnalysis_pdf <- downloadHandler(
+  #   #pdf report
+  #   filename = function() {
+  #     paste0("Survey Analysis by Demographic", ".pdf")
+  #   },
+  #   content = function(file) {
+  #     tempReport <- file.path(tempdir(), 'scripts/pdf_export.Rmd, tempReport, overwrite = TRUE')
+  #     file.copy('scripts/pdf_export.Rmd', tempReport, overwrite = TRUE)
+  #     output <- rmarkdown::render(input = tempReport)
+  #     file.copy(output, file) 
+  #   })
   
   ## Detailed analysis ----
   observe({
@@ -301,8 +361,8 @@ ui <- dashboardPage(
   sidebar = sidebar,
   body = body,
   #controlbar = dashboardControlbar(),
-  title = "HR SURVEY DEMO",
-  skin='red'
+  title = "HR SURVEY DEMO"
+ # skin='red'
   
 )
 shinyApp(ui = ui,
