@@ -22,7 +22,7 @@ header <- dashboardHeader(fixed=T,
                           #skinSelector()
                           title='HR APP',
                          tags$h1('HUMAN RESOURCES SURVEY ENGAGEMENT ANALYSIS',
-                                 style = "font-size: 36px ;" ),
+                                 style = "font-size: 36px ; color: #FF0000 ;")
                           )
 sidebar <- dashboardSidebar(
   width = 220,
