@@ -520,12 +520,10 @@ generate_Question_category_plots2 <- function(df, question_type) {
       color = 'white',
       fontface = 'bold'
     ) +
-  #  geom_text(data = axis_questions,aes(x=0, y = Question_desc))+
     theme_void() +
-    scale_x_discrete(labels = stringr::str_wrap(unique(new_df$Question_merged) , width = 70))+
     #scale_x_discrete(labels = sort(stringr::str_wrap(new_df$Question_merged )))+
     #scale_x_discrete(labels = stringr::str_wrap(sort(axis_questions$Question_merged,decreasing = T)))+
-  #  scale_x_discrete(labels = sort(as.integer(axis_questions$Question_number,decreasing = T)))+
+    scale_x_discrete(labels = sort(as.integer(axis_questions$Question_number,decreasing = T)))+
     scale_y_continuous() +
     theme(
       legend.position = 'bottom',

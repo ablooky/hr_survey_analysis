@@ -5,7 +5,7 @@ library(shinyWidgets)
 library(bs4Dash)
 library(reactable)
 library(fresh)
-#library(plotly)
+library(plotly)
 #library(tidyverse)
 source('scripts/ui.R')
 #source('analyze.R')
@@ -52,26 +52,26 @@ sidebar <- dashboardSidebar(
     id = 'sidebar', 
     hr(),br(),
     menuItem(
-      "Summary Analysis",
+      "SUMMARY",
       #selected = T,
       tabName = 'summary',
       icon = icon('file-lines')
     ),
     menuItem(
-      "Detailed Analysis",
+      "DETAILS",
       selected=TRUE,
       tabName = 'detailed_analysis',
       icon = icon('chart-bar')
       
     ),
     menuItem(
-      "Demographic Analysis",
+      "DEMOGRAPHIC",
       # selected=TRUE,
       tabName = 'demographic_analysis',
       icon = icon('th-large')
       
     ),
-    menuItem("Downloads",
+    menuItem("DOWNLOADS",
             # selected=TRUE,
              tabName = 'downloads',
              icon = icon('download')
@@ -101,15 +101,15 @@ detailed_tab <- tabItem (
     )),
   conditionalPanel(
     condition = "input.selected_question_category != 'All Questions'",
-    box(width = 6, 
+   # box(width = 6, 
         # plotOutput('detailed_questions_plot', height = 200),
-        plotOutput('detailed_questions_plot2', height = 200)
-    ),
-    box(
-      width = 6,
-      tableOutput('questions_filtered_table'),
-      height = 200
-    )
+        plotOutput('detailed_questions_plot2', height = 300)
+   # ),
+   # box(
+   #   width = 6,
+   #   tableOutput('questions_filtered_table'),
+   #   height = 200
+   # )
   )
   
 )
