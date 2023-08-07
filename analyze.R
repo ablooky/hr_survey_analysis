@@ -352,36 +352,89 @@ make_reactable_df5<-function(df,summary_demographics_table){
     mutate (Favorability = NA) %>% 
     tibble::rownames_to_column("Question Category") %>%
     as.data.frame()
-  p<-reactable( 
-    #subset_df3,
-    df2,
-                 defaultSorted = "Question Category",
-                columns = list(
-                'Question Category' = colDef(
-                  details = colDef(
-                    #name='Description',
-                                   details = function(index){
-                                    htmltools::div(
-                                      "Category Breakdown (%)",
-                                       htmltools::tags$pre(paste(
-                                        capture.output(
-                                           print(subset_df[index,])
-                                       ),
-                                        ),
-                                         collapse = '\n')
-                                   )
-                },
-                                   align='left', width = 400, html=T
-                  )
-                ),
-                 Favorability = 
-                   colDef(cell = function(value,index){
-                 #    htmltools::plotTag(plot_list[[index]], alt="plots")
-                  # plot_list[[index]]
-                 }, width=260,align = "left")
-               ), borderless = T, outlined = T,compact=T)
-  p
-  print(subset_df)
+  
+  detailed_df<-data.frame()
+  for(r in 1:nrow(subset_df)){
+    temp_row<-c(rownames(subset_df)[r],NA, NA)
+    names(temp_row)<-c('Question Category', 'Demographic Group', 'Favorability')
+    detailed_df<-bind_rows(detailed_df,temp_row)
+    for(column in 1:ncol(subset_df)){
+      temp_row<-c(rownames(subset_df)[r],colnames(subset_df)[column],subset_df[r,column])
+      names(temp_row)<-c('Question Category', 'Demographic Group', 'Favorability')
+      detailed_df<-bind_rows(detailed_df,temp_row)
+    }
+  }
+  
+  # p<-reactable(detailed_df,
+  #              defaultPageSize = 20,
+  #              details = function(index){
+  #                htmltools::div('Demographic Group: ',index,
+  #                               htmltools::tags$pre(paste(
+  #                                 capture.output(reactable(filter(detailed_df,
+  #                                                       'Question Category' == detailed_df[index,'Question Category'] )), collapse = "\n"))))
+  #   
+  # })
+  # p
+  p<-reactable(detailed_df,
+               defaultPageSize = 20)
+  
+  # p<-reactable(detailed_df,
+  #              defaultPageSize = 20,
+  #              columns = list(
+  #                Favorability= colDef(
+  #                  cell = function(value){
+  #                    width <- paste0(value, "%")
+  #                    value <- format(value, width = 9, justify = "right")
+  #                    bar <- div(
+  #                      class = "bar-chart",
+  #                      style = list(marginRight = "0.375rem"),
+  #                      div(class = "bar", 
+  #                          style = list(width = width,
+  #                                       backgroundColor = "#3fc1c9")
+  #                          )
+  #                    )
+  #                    div(class = "bar-cell", span(class = "number", value), bar)
+  #                  }
+  #                )
+  #              )
+  #              # div(class = "detailed",
+  #              #     div(class = "followers-header",
+  #              #         h2(class = "followers-title", "Detailed Analysis"),
+  #              #         "Breakdown by Question Category and Demographic Group"
+  #              #     )),
+  #             #     detailed_df
+  #              )
+  # p
+  # p<-reactable( 
+  #   #subset_df3,
+  #   df2,
+  #                defaultSorted = "Question Category",
+  #               columns = list(
+  #               'Question Category' = colDef(
+  #                 details = colDef(
+  #                   #name='Description',
+  #                                  details = function(index){
+  #                                   htmltools::div(
+  #                                     "Category Breakdown (%)",
+  #                                      htmltools::tags$pre(paste(
+  #                                       capture.output(
+  #                                          print(subset_df[index,])
+  #                                      ),
+  #                                       ),
+  #                                        collapse = '\n')
+  #                                  )
+  #               },
+  #                                  align='left', width = 400, html=T
+  #                 )
+  #               ),
+  #                Favorability = 
+  #                  colDef(cell = function(value,index){
+  #                #    htmltools::plotTag(plot_list[[index]], alt="plots")
+  #                 # plot_list[[index]]
+  #                }, width=260,align = "left")
+  #              ), borderless = T, outlined = T,compact=T)
+  # p
+  # print(subset_df)
   # p <- reactable(
   #   df2,
   #   defaultSorted = "Question Category",
