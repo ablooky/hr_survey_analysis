@@ -1,4 +1,4 @@
-source('analyze.R')
+source('scripts/analyze.R')
 library(plotly)
 library(patchwork)
 library(reactable)
@@ -13,6 +13,7 @@ get_years_list <- function(client_name) {
   years_list <- c()
   files_list <-
     list.files(paste0('data/clients/', client_name, '/years/'))
+  #list.files(paste0('data/clients/', client_name, '/'))
   for (x in 1:length(files_list)) {
     years_list <- c(gsub('.xlsx', '', files_list[x]), years_list)
   }
