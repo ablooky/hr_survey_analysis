@@ -6,10 +6,9 @@ library(bs4Dash)
 library(reactable)
 library(fresh)
 library(plotly)
-#library(tidyverse)
+
 source('scripts/ui.R')
-#source('analyze.R')
-source('visualize.R')
+source('scripts/visualize.R')
 
 clients<-list.files('data/clients')
 
