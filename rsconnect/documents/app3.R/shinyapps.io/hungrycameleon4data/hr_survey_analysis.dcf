@@ -1,0 +1,13 @@
+name: hr_survey_analysis
+title: hr_survey_analysis
+username:
+account: hungrycameleon4data
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9493433
+bundleId: 7485932
+url: https://hungrycameleon4data.shinyapps.io/hr_survey_analysis/
+when: 1690042212.61872
+lastSyncTime: 1690042212.61874
+asMultiple: FALSE
+asStatic: FALSE
